@@ -42,6 +42,7 @@ public class Nonpre {
 
         int currentTime = 0;
         int totalTurnaroundTime = 0;       
+        int totalWaitingTime = 0;
        
        /** // Display the process details in a table format
         System.out.println("\n+-----------------------------------------------------+");
@@ -65,16 +66,30 @@ public class Nonpre {
             int turnaroundTime = currentTime + process.getBurstTime() - process.getArrivalTime();
             System.out.println("  (Turnaround Time: " + turnaroundTime + ")");
             
+            //total the turnaround time
             totalTurnaroundTime += turnaroundTime;
+            
+            //calculare and dsiplay waiting time for each process
+            int waitingTime = turnaroundTime - process.getBurstTime();
+            System.out.println("    (Waiting Time: " + waitingTime + ")");
+
+            // Accumulate total waiting time
+            totalWaitingTime += waitingTime;
             
             currentTime += process.getBurstTime();
         }
 
         // System.out.println("+-----------------------------------------------------+");
         
+        //display total avg tt
         System.out.println("\nTotal Turnaround Time: " + totalTurnaroundTime);
         double averageTurnaroundTime = (double) totalTurnaroundTime / (double) processes.size();
         System.out.println("Average Turnaround Time: " + averageTurnaroundTime);
+        
+        //dispplay total wt
+        System.out.println("Total Waiting Time: " + totalWaitingTime);
+        double averageWaitingTime = (double) totalWaitingTime / (double) processes.size();
+        System.out.println("Average Waiting Time: " + averageWaitingTime);
 
         scanner.close();
     }
