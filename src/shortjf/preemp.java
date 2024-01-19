@@ -12,39 +12,20 @@ public class preemp {
 	public static void main(String[] args) {
 		 // Scanner for user input 
         Scanner scanner = new Scanner(System.in);
-        List<Process> processes = new ArrayList<>();
+        List<Process> processes = getProcessesFromUser(scanner);
         PriorityQueue<Process> readyQueue = new PriorityQueue<>(Comparator.comparingInt(Process::getRemainingBurstTime));
-        
-        // Detail for each process collected here
-        char addAnotherProcess;
-        
-        do {
         // user enter Pid
-        System.out.print("Enter your Process ID: ");
-        int processId = scanner.nextInt();
-        
-        // user enter AT
-        System.out.print("Enter your Arrival Time: ");
-        int arrivalTime = scanner.nextInt();
-        
-        // user enter BT
-        System.out.print("Enter your Burst Time: ");
-        int burstTime = scanner.nextInt();
-        
-        processes.add(new Process(processId, arrivalTime, burstTime));
 
-        System.out.print("Do you want to add another process? (y/n): ");
-        addAnotherProcess = scanner.next().toLowerCase().charAt(0);
-        } while (addAnotherProcess == 'y');
+        int initialProcessesCount = processes.size();
         
         // Sort the process by AT
         processes.sort(Comparator.comparingInt(Process::getArrivalTime));
-        
 
         int currentTime = 0;
         int totalTurnaroundTime = 0;
         int totalWaitingTime = 0;
-        
+        int completedProcesses = 0;
+
         while (!processes.isEmpty() || !readyQueue.isEmpty()) {
             // Move arrived processes to the ready queue
             while (!processes.isEmpty() && processes.get(0).getArrivalTime() <= currentTime) {
@@ -58,40 +39,63 @@ public class preemp {
             if (currentProcess != null) {
                 System.out.print("P" + currentProcess.getProcessId() + "  ");
                 currentProcess.decrementRemainingBurstTime();
-                
+
                 // Update turnaround time and waiting time for the executed process
                 if (currentProcess.getRemainingBurstTime() == 0) {
                     int turnaroundTime = currentTime - currentProcess.getArrivalTime() + 1;
                     int waitingTime = turnaroundTime - currentProcess.getBurstTime();
-                    
+
                     totalTurnaroundTime += turnaroundTime;
                     totalWaitingTime += waitingTime;
-                    
+
                     System.out.println("(Finishing Time: " + currentTime + ")");
+                    completedProcesses++;
                 } else {
                     // If the process is not finished, put it back in the ready queue
                     readyQueue.add(currentProcess);
                 } 
             } else {
-            	System.out.print("IDLE  ");
+                System.out.print("IDLE  ");
             }
 
             currentTime++;
         }
-        
+
         System.out.println("\nTotal Turnaround Time: " + totalTurnaroundTime);
 
-        double averageTurnaroundTime = (double) totalTurnaroundTime / (double) processes.size();
-        System.out.println("Average Turnaround Time: " + averageTurnaroundTime);
+        double averageTurnaroundTime = (completedProcesses > 0) ? (double) totalTurnaroundTime / completedProcesses : 0;
+        System.out.println("Average Turnaround Time: " + String.format("%.4f", averageTurnaroundTime));
 
         // Display total and average waiting time
         System.out.println("Total Waiting Time: " + totalWaitingTime);
 
-        double averageWaitingTime = (double) totalWaitingTime / (double) processes.size();
-        System.out.println("Average Waiting Time: " + averageWaitingTime);
-
+        double averageWaitingTime = (completedProcesses > 0) ? (double) totalWaitingTime / completedProcesses : 0;
+        System.out.println("Average Waiting Time: " + String.format("%.4f", averageWaitingTime));
         scanner.close();
-	}
+    }
+
+    private static List<Process> getProcessesFromUser(Scanner scanner) {
+        List<Process> processes = new ArrayList<>();
+        char addAnotherProcess;
+
+        do {
+            System.out.print("Enter your Process ID: ");
+            int processId = scanner.nextInt();
+
+            System.out.print("Enter your Arrival Time: ");
+            int arrivalTime = scanner.nextInt();
+
+            System.out.print("Enter your Burst Time: ");
+            int burstTime = scanner.nextInt();
+
+            processes.add(new Process(processId, arrivalTime, burstTime));
+
+            System.out.print("Do you want to add another process? (y/n): ");
+            addAnotherProcess = scanner.next().toLowerCase().charAt(0);
+        } while (addAnotherProcess == 'y');
+
+        return processes;
+    }
 	
 	 static class Process {
 	        private int processId;
