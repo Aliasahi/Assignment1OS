@@ -12,132 +12,130 @@ public class preemp {
 	public static void main(String[] args) {
 		 // Scanner for user input 
         Scanner scanner = new Scanner(System.in);
-        List<Process> processes = getProcessesFromUser(scanner);
-        PriorityQueue<Process> readyQueue = new PriorityQueue<>(Comparator.comparingInt(Process::getRemainingBurstTime));
-        // user enter Pid
+        List<Process> processes = noOfProcess(scanner);
+        PriorityQueue<Process> inQ = new PriorityQueue<>(Comparator.comparingInt(Process::leftBT));
 
-        int initialProcessesCount = processes.size();
+        int processCount = processes.size();
         
         // Sort the process by AT
-        processes.sort(Comparator.comparingInt(Process::getArrivalTime));
+        processes.sort(Comparator.comparingInt(Process::getAT));
 
-        int currentTime = 0;
-        int totalTurnaroundTime = 0;
-        int totalWaitingTime = 0;
-        int completedProcesses = 0;
+        int executionTime = 0;
+        int totalTAT = 0;
+        int totalWT = 0;
+        int processFinish = 0;
 
-        while (!processes.isEmpty() || !readyQueue.isEmpty()) {
-            // Move arrived processes to the ready queue
-            while (!processes.isEmpty() && processes.get(0).getArrivalTime() <= currentTime) {
-                readyQueue.add(processes.remove(0));
+        while (!processes.isEmpty() || !inQ.isEmpty()) {
+            // process to execute go to the ready queue
+            while (!processes.isEmpty() && processes.get(0).getAT() <= executionTime) {
+                inQ.add(processes.remove(0));
             }
 
-            // Select the process with the shortest remaining burst time from the ready queue
-            Process currentProcess = readyQueue.poll();
+            // to select the shortest bt
+            Process currentProcess = inQ.poll();
 
-            // Execute the process for 1 time unit
+            // Execute the process
             if (currentProcess != null) {
                 System.out.print("P" + currentProcess.getProcessId() + "  ");
-                currentProcess.decrementRemainingBurstTime();
+                currentProcess.reducedBT();
 
-                // Update turnaround time and waiting time for the executed process
-                if (currentProcess.getRemainingBurstTime() == 0) {
-                    int turnaroundTime = currentTime - currentProcess.getArrivalTime() + 1;
-                    int waitingTime = turnaroundTime - currentProcess.getBurstTime();
+                // Update tat and wt for executed process
+                if (currentProcess.leftBT() == 0) {
+                    int tat = executionTime - currentProcess.getAT() + 1;
+                    int wt = tat - currentProcess.getbt();
 
-                    totalTurnaroundTime += turnaroundTime;
-                    totalWaitingTime += waitingTime;
+                    totalTAT += tat;
+                    totalWT += wt;
 
-                    System.out.println("(Finishing Time: " + currentTime + ")");
-                    completedProcesses++;
+                    System.out.println("(Finishing Time: " + executionTime + ")");
+                    processFinish++;
                 } else {
-                    // If the process is not finished, put it back in the ready queue
-                    readyQueue.add(currentProcess);
+                    // If the process not done move to ready queue
+                    inQ.add(currentProcess);
                 } 
-            } else {
-                System.out.print("IDLE  ");
             }
 
-            currentTime++;
+            executionTime++;
         }
 
-        System.out.println("\nTotal Turnaround Time: " + totalTurnaroundTime);
+        System.out.println("\nTotal Turnaround Time: " + totalTAT);
 
-        double averageTurnaroundTime = (completedProcesses > 0) ? (double) totalTurnaroundTime / completedProcesses : 0;
-        System.out.println("Average Turnaround Time: " + String.format("%.4f", averageTurnaroundTime));
+        double avgTAT = (processFinish > 0) ? (double) totalTAT / processFinish : 0;
+        System.out.println("Average Turnaround Time: " + String.format("%.4f", avgTAT));
 
         // Display total and average waiting time
-        System.out.println("Total Waiting Time: " + totalWaitingTime);
+        System.out.println("Total Waiting Time: " + totalWT);
 
-        double averageWaitingTime = (completedProcesses > 0) ? (double) totalWaitingTime / completedProcesses : 0;
-        System.out.println("Average Waiting Time: " + String.format("%.4f", averageWaitingTime));
+        double avgWT = (processFinish > 0) ? (double) totalWT / processFinish : 0;
+        System.out.println("Average Waiting Time: " + String.format("%.4f", avgWT));
         scanner.close();
     }
 
-    private static List<Process> getProcessesFromUser(Scanner scanner) {
+    private static List<Process> noOfProcess(Scanner scanner) {
         List<Process> processes = new ArrayList<>();
-        char addAnotherProcess;
+        char addP;
 
         do {
             System.out.print("Enter your Process ID: ");
             int processId = scanner.nextInt();
 
             System.out.print("Enter your Arrival Time: ");
-            int arrivalTime = scanner.nextInt();
+            int at = scanner.nextInt();
 
             System.out.print("Enter your Burst Time: ");
-            int burstTime = scanner.nextInt();
+            int bt = scanner.nextInt();
 
-            processes.add(new Process(processId, arrivalTime, burstTime));
+            processes.add(new Process(processId, at, bt));
 
             System.out.print("Do you want to add another process? (y/n): ");
-            addAnotherProcess = scanner.next().toLowerCase().charAt(0);
-        } while (addAnotherProcess == 'y');
+            addP = scanner.next().toLowerCase().charAt(0);
+        } while (addP == 'y');
 
         return processes;
     }
 	
 	 static class Process {
 	        private int processId;
-	        private int arrivalTime;
-	        private int burstTime;
-	        private int remainingBurstTime;
-	        private int waitingTime;
+	        private int at;
+	        private int bt;
+	        private int remainingbt;
+	        private int wt;
 
-	        public Process(int processId, int arrivalTime, int burstTime) {
+	        public Process(int processId, int at, int bt) {
 	            this.processId = processId;
-	            this.arrivalTime = arrivalTime;
-	            this.burstTime = burstTime;
-	            this.remainingBurstTime = burstTime;
-	            this.waitingTime = 0;
+	            this.at = at;
+	            this.bt = bt;
+	            this.remainingbt = bt;
+	            this.wt = 0;
 	        }
 
 	        public int getProcessId() {
 	            return processId;
 	        }
 
-	        public int getArrivalTime() {
-	            return arrivalTime;
+	        public int getAT() {
+	            return at;
 	        }
 
-	        public int getBurstTime() {
-	            return burstTime;
+	        public int getbt() {
+	            return bt;
 	        }
 
-	        public int getRemainingBurstTime() {
-	            return remainingBurstTime;
+	        public int leftBT() {
+	            return remainingbt;
 	        }
 
-	        public void decrementRemainingBurstTime() {
-	            this.remainingBurstTime = Math.max(0, this.remainingBurstTime - 1);
+	        public void reducedBT() {
+	            this.remainingbt = Math.max(0, this.remainingbt - 1);
+	        }
+	        
+	        //for incrasing the wt in the queue in purpose when avg count
+	        public void incrementwt() {
+	            this.wt++;
 	        }
 
-	        public void incrementWaitingTime() {
-	            this.waitingTime++;
-	        }
-
-	        public int getWaitingTime() {
-	            return waitingTime;
+	        public int getWT() {
+	            return wt;
 	        }
 	 }
 }
