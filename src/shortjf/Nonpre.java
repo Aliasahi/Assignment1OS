@@ -1,6 +1,8 @@
 package shortjf;
 
 import java.util.Scanner;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -10,13 +12,10 @@ public class Nonpre {
         Scanner scanner = new Scanner(System.in);
         List<Process> processes = new ArrayList<>();
         
-        // user input No of Process
-        System.out.print("Enter the number of processes: ");
-        int numberOfProcesses = scanner.nextInt();
-        
         // Collect details for each process
-        for (int i = 1; i <= numberOfProcesses; i++) {
-            System.out.println("\nProcess #" + i);
+        char addAnotherProcess;
+        
+        do {
         // user enter Pid
         System.out.print("Enter your Process ID: ");
         int processId = scanner.nextInt();
@@ -30,50 +29,79 @@ public class Nonpre {
         int burstTime = scanner.nextInt();
         
         processes.add(new Process(processId, arrivalTime, burstTime));
-        
-    }
 
-        // Display the process details in a table format
+        System.out.print("Do you want to add another process? (y/n): ");
+        addAnotherProcess = scanner.next().toLowerCase().charAt(0);
+        } while (addAnotherProcess == 'y');
+        
+         // Sort processes based on burst times (shortest job first)
+        Collections.sort(processes, Comparator.comparingInt(Process::getBurstTime));
+        
+        // Display Gantt chart
+        System.out.println("\nGantt Chart:");
+
+        int currentTime = 0;
+        int totalTurnaroundTime = 0;       
+       
+       /** // Display the process details in a table format
         System.out.println("\n+-----------------------------------------------------+");
         System.out.println("|                     Process Information             |");
         System.out.println("+-----------------------------------------------------+");
         System.out.printf("| %-15s | %-15s | %-15s |\n", "Process ID", "Arrival Time", "Burst Time");
         System.out.println("+-----------------------------------------------------+");
 
-
+        */
+        
         for (Process process : processes) {
-            System.out.printf("| %-15d | %-15d | %-15d |\n", process.getProcessId(), process.getArrivalTime(), process.getBurstTime());
+        	//display process execution
+            System.out.print("  P" + process.getProcessId()+ "  ");
+            
+            //display timelinw
+            for (int i = 0; i < process.getBurstTime(); i++ ) {
+            	System.out.print("-");
+            }
+            
+            // Calculate and display turnaround time for each process
+            int turnaroundTime = currentTime + process.getBurstTime() - process.getArrivalTime();
+            System.out.println("  (Turnaround Time: " + turnaroundTime + ")");
+            
+            totalTurnaroundTime += turnaroundTime;
+            
+            currentTime += process.getBurstTime();
         }
 
-        System.out.println("+-----------------------------------------------------+");
+        // System.out.println("+-----------------------------------------------------+");
+        
+        System.out.println("\nTotal Turnaround Time: " + totalTurnaroundTime);
+        double averageTurnaroundTime = (double) totalTurnaroundTime / (double) processes.size();
+        System.out.println("Average Turnaround Time: " + averageTurnaroundTime);
 
         scanner.close();
-    
-}
-
-static class Process {
-    private int processId;
-    private int arrivalTime;
-    private int burstTime;
-
-    public Process(int processId, int arrivalTime, int burstTime) {
-        this.processId = processId;
-        this.arrivalTime = arrivalTime;
-        this.burstTime = burstTime;
     }
 
-    public int getProcessId() {
-        return processId;
-    }
-
-    public int getArrivalTime() {
-        return arrivalTime;
-    }
-
-    public int getBurstTime() {
-        return burstTime;
-    	}
+	static class Process {
+	    private int processId;
+	    private int arrivalTime;
+	    private int burstTime;
+	
+	    public Process(int processId, int arrivalTime, int burstTime) {
+	        this.processId = processId;
+	        this.arrivalTime = arrivalTime;
+	        this.burstTime = burstTime;
+	    }
+	
+	    public int getProcessId() {
+	        return processId;
+	    }
+	
+	    public int getArrivalTime() {
+	        return arrivalTime;
+	    }
+	
+	    public int getBurstTime() {
+	        return burstTime;
+	    	}
+		}
 	}
-}
 
 
