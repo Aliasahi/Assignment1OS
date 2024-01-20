@@ -12,26 +12,26 @@ public class roundR {
         Scanner scanner = new Scanner(System.in);
 
         List<Process> processes = noOfProcess(scanner);
-        int timeQuantum = getTimeQuantum(scanner);
+        int timeQuantum = getTQ(scanner);
 
-        PriorityQueue<Process> readyQueue = new PriorityQueue<>(Comparator.comparingInt(Process::getAT));
+        PriorityQueue<Process> inQ = new PriorityQueue<>(Comparator.comparingInt(Process::getAT));
         int currentTime = 0;
-        int totalTurnaroundTime = 0;
-        int totalWaitingTime = 0;
-        int completedProcesses = 0;
+        int totalTAT = 0;
+        int totalWT = 0;
+        int processFinish = 0;
 
-        while (!processes.isEmpty() || !readyQueue.isEmpty()) {
-            // Add processes to the ready queue based on arrival time
+        while (!processes.isEmpty() || !inQ.isEmpty()) {
+            //to add process by the at
             while (!processes.isEmpty() && processes.get(0).getAT() <= currentTime) {
-                readyQueue.add(processes.remove(0));
+                inQ.add(processes.remove(0));
             }
 
-            // Execute processes in the ready queue
-            Process currentProcess = readyQueue.poll();
+            // execute
+            Process currentProcess = inQ.poll();
 
             if (currentProcess != null) {
-                int remainingBurstTime = currentProcess.leftBT();
-                int executionTime = Math.min(timeQuantum, remainingBurstTime);
+                int remainingBT = currentProcess.leftBT();
+                int executionTime = Math.min(timeQuantum, remainingBT);
                 currentProcess.reducedBT();
 
                 System.out.print("P" + currentProcess.getProcessId() + "  ");
@@ -39,32 +39,30 @@ public class roundR {
                 currentTime += executionTime;
 
                 if (currentProcess.leftBT() == 0) {
-                    int turnaroundTime = currentTime - currentProcess.getAT();
-                    int waitingTime = turnaroundTime - currentProcess.getbt();
+                    int tat = currentTime - currentProcess.getAT();
+                    int wt = tat - currentProcess.getbt();
 
-                    totalTurnaroundTime += turnaroundTime;
-                    totalWaitingTime += waitingTime;
-                    completedProcesses++;
+                    totalTAT += tat;
+                    totalWT += wt;
+                    processFinish++;
 
                     System.out.println("(Finishing Time: " + currentTime + ")");
                 } else {
-                    readyQueue.add(currentProcess);
+                    inQ.add(currentProcess);
                 }
             } else {
-                // No process to execute, go to the next time unit
-                System.out.print("IDLE  ");
                 currentTime++;
             }
         }
 
-        System.out.println("\nTotal Turnaround Time: " + totalTurnaroundTime);
-        System.out.println("Total Waiting Time: " + totalWaitingTime);
+        System.out.println("\nTotal Turnaround Time: " + totalTAT);
+        System.out.println("Total Waiting Time: " + totalWT);
 
-        double averageTurnaroundTime = (completedProcesses > 0) ? (double) totalTurnaroundTime / completedProcesses : 0;
-        System.out.println("Average Turnaround Time: " + String.format("%.4f", averageTurnaroundTime));
+        double avgTAT = (processFinish > 0) ? (double) totalTAT / processFinish : 0;
+        System.out.println("Average Turnaround Time: " + String.format("%.2f", avgTAT));
 
-        double averageWaitingTime = (completedProcesses > 0) ? (double) totalWaitingTime / completedProcesses : 0;
-        System.out.println("Average Waiting Time: " + String.format("%.4f", averageWaitingTime));
+        double avgWT = (processFinish > 0) ? (double) totalWT / processFinish : 0;
+        System.out.println("Average Waiting Time: " + String.format("%.2f", avgWT));
 
         scanner.close();
     }
@@ -74,25 +72,25 @@ public class roundR {
         char addP;
 
         do {
-            System.out.print("Enter your Process ID: ");
+            System.out.print("Process ID: ");
             int processId = scanner.nextInt();
 
-            System.out.print("Enter your Arrival Time: ");
+            System.out.print("Arrival Time: ");
             int at = scanner.nextInt();
 
-            System.out.print("Enter your Burst Time: ");
+            System.out.print("Burst Time: ");
             int bt = scanner.nextInt();
 
             processes.add(new Process(processId, at, bt));
 
-            System.out.print("Do you want to add another process? (y/n): ");
+            System.out.print("Add process? (y/n): ");
             addP = scanner.next().toLowerCase().charAt(0);
         } while (addP == 'y');
 
         return processes;
     }
 
-    private static int getTimeQuantum(Scanner scanner) {
+    private static int getTQ(Scanner scanner) {
         System.out.print("Enter time quantum: ");
         return scanner.nextInt();
     }
