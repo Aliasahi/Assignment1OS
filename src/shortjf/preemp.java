@@ -76,18 +76,18 @@ public class preemp {
         char addP;
 
         do {
-            System.out.print("Enter your Process ID: ");
+            System.out.print("Process ID: ");
             int processId = scanner.nextInt();
 
-            System.out.print("Enter your Arrival Time: ");
+            System.out.print("Arrival Time: ");
             int at = scanner.nextInt();
 
-            System.out.print("Enter your Burst Time: ");
+            System.out.print("Burst Time: ");
             int bt = scanner.nextInt();
 
             processes.add(new Process(processId, at, bt));
 
-            System.out.print("Do you want to add another process? (y/n): ");
+            System.out.print("Add process? (y/n): ");
             addP = scanner.next().toLowerCase().charAt(0);
         } while (addP == 'y');
 
