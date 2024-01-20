@@ -59,11 +59,12 @@ public class preemp {
         }
 
         System.out.println("\nTotal Turnaround Time: " + totalTAT);
-
+        
+        //total and avg tat
         double avgTAT = (processFinish > 0) ? (double) totalTAT / processFinish : 0;
         System.out.println("Average Turnaround Time: " + String.format("%.4f", avgTAT));
 
-        // Display total and average waiting time
+        // total and avg wt
         System.out.println("Total Waiting Time: " + totalWT);
 
         double avgWT = (processFinish > 0) ? (double) totalWT / processFinish : 0;
